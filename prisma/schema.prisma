@@ -1,0 +1,380 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  NURSE
+  DOCTOR
+  LAB_TECHNICIAN
+  PATIENT
+  CASHIER
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  DORMANT
+}
+
+enum JOBTYPE {
+  FULL
+  PART  
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum AppointmentStatus {
+  PENDING
+  SCHEDULED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+}
+
+enum PaymentStatus {
+  PAID
+  UNPAID
+  PART
+}
+
+
+model Patient {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title  String
+  first_name  String
+  Last_name   String
+  date_of_birth   DateTime 
+  gender      Gender
+  address       String
+  phone_number String @unique
+  email        String
+  martial_status String
+  emergency_contact_name     String
+  emergency_contact_number   String
+  emergency_contact_relation String
+  blood_group          String?  // Consider using BloodGroup enum
+  allergies            String[]  // Could be String[] for multiple allergies
+  medical_conditions   String[]  // Current medical conditions
+  medical_history      String?
+  privacy_consent      Boolean  // Consent for privacy policy
+  service_consent      Boolean  // Consent for terms of service
+  medical_consent      Boolean  // Consent for medical treatment
+  profile_image        String?  // URL or path to profile image
+   colorCode               String?
+
+// Relations
+   appointments             Appointment[]
+  medical                  MedicalRecord[]
+  payments                 Payment[]
+  ratings                  Rating[]
+
+ // Timestamps
+  created_at               DateTime @default(now())
+  updated_at               DateTime @updatedAt
+
+  @@map("patients")
+  vitalSigns VitalSign[]
+  diagnoses Diagnosis[]
+}
+
+model Doctor {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
+  name      String
+  specialization   String
+  licenseNumber    String    @unique
+  phone     String
+  address   String
+  department         String?
+  profileImage       String?
+  colorCode          String?
+  availabilityStatus   Boolean   @default(true)
+
+  jobType               JOBTYPE   @default(FULL)
+  workingDays           WorkingDay[]
+  appointments          Appointment[]
+  ratings               Rating[]
+  diagnoses             Diagnosis[]
+  medicalRecords        MedicalRecord[]
+
+ 
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("doctors")
+}
+
+model WorkingDay {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  doctorId    String   @db.ObjectId
+  dayOfWeek   String   
+  startTime   String
+  endTime     String
+  isAvailable  Boolean  @default(true)
+
+  doctor          Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("working_days")
+}
+
+model Staff {
+  id   String   @id @default(auto()) @map("_id") @db.ObjectId
+  email  String   @unique
+  name    String
+  phone    String
+  address     String
+  department    String?
+  profileImage  String?
+  licenseNumber String?
+  colorCode     String?
+
+  role          Role
+  status        Status @default(ACTIVE)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("staff")
+}
+
+model Appointment {
+  id       String            @id @default(auto()) @map("_id") @db.ObjectId
+  patientId   String            @db.ObjectId
+  doctorId    String            @db.ObjectId
+  appointmentDate DateTime
+  startTime       String
+  endTime         String
+  status          AppointmentStatus @default(PENDING)
+  type       String
+  notes      String?
+  reason     String?
+  duration    Int               @default(30) // in minutes
+
+
+  patient         Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor          Doctor          @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  payment         Payment?
+  medicalRecord   MedicalRecord?
+
+ 
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@map("appointments")
+}
+
+model Payment {
+  id      String        @id @default(auto()) @map("_id") @db.ObjectId
+  patientId       String        @db.ObjectId
+  appointmentId   String        @db.ObjectId @unique
+  billDate        DateTime
+  paymentDate     DateTime?
+  discount        Float         @default(0)
+  totalAmount     Float
+  amountPaid      Float         @default(0)
+  balance         Float         @default(0)
+
+  paymentMethod   PaymentMethod @default(CASH)
+  status          PaymentStatus @default(UNPAID)
+  receiptNumber   String        @unique
+
+  
+  patient         Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointment     Appointment   @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  billItems       BillItem[]
+
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+model BillItem {
+  id    String    @id @default(auto()) @map("_id") @db.ObjectId
+  paymentId       String    @db.ObjectId
+  serviceId       String    @db.ObjectId
+  serviceDate     DateTime
+  quantity        Int       @default(1)
+  unitCost        Float
+  totalCost       Float
+
+  payment         Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  service         Service @relation(fields: [serviceId], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("bill_items")
+}
+
+model LabTest {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  medicalRecordId String    @db.ObjectId
+  testDate        DateTime
+  testName        String
+  result          String?
+  normalRange     String?
+  status          String    @default("PENDING") 
+  notes           String?
+  technicianNotes String?
+
+  
+  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id], onDelete: Cascade)
+
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("lab_tests")
+}
+
+model MedicalRecord {
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  patientId       String      @db.ObjectId
+  appointmentId   String      @db.ObjectId @unique
+  doctorId        String      @db.ObjectId
+  chiefComplaint  String?
+  treatmentPlan   String?
+  prescriptions   String?
+  labRequest      String?
+  notes           String?
+  followUpDate    DateTime?
+
+
+  patient         Patient     @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointment     Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  doctor          Doctor      @relation(fields: [doctorId], references: [id])
+  labTests        LabTest[]
+  vitalSigns      VitalSign[]
+  diagnoses       Diagnosis[]
+
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("medical_records")
+}
+
+model VitalSign {
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  patientId           String    @db.ObjectId
+  medicalRecordId     String    @db.ObjectId
+  bodyTemperature     Float?    
+  systolicBP          Int?      
+  diastolicBP         Int?      
+  heartRate           Int?      
+  respiratoryRate     Int?      
+  oxygenSaturation    Float?    
+  weight              Float?    
+  height              Float?    
+  bmi                 Float?    
+
+  
+  Patient         Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id], onDelete: Cascade)
+
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("vital_signs")
+}
+
+model Diagnosis {
+  id                      String    @id @default(auto()) @map("_id") @db.ObjectId
+  patientId               String    @db.ObjectId
+  medicalRecordId         String    @db.ObjectId
+  doctorId                String    @db.ObjectId
+  symptoms                String[]
+  diagnosisCode          String?   // ICD-10 code
+  diagnosisDescription   String
+  notes                   String?
+  prescribedMedications  String[]
+  followUpPlan           String?
+  severity               String?   // MILD, MODERATE, SEVERE
+
+ 
+  patient         Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id], onDelete: Cascade)
+  doctor          Doctor        @relation(fields: [doctorId], references: [id])
+
+ 
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("diagnoses")
+}
+
+model Service {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  serviceName     String
+  description     String?
+  category        String    
+  price           Float
+  duration        Int?      
+  isActive        Boolean   @default(true)
+
+  
+  billItems       BillItem[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("services")
+}
+
+model Rating {
+  id      String    @id @default(auto()) @map("_id") @db.ObjectId
+  patientId     String    @db.ObjectId
+  doctorId      String    @db.ObjectId
+  rating        Int       
+  comment       String?
+  wouldRecommend  Boolean?
+
+
+  patient         Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor          Doctor    @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("ratings")
+}
+
+model AuditLog {
+  id     String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String
+  userRole    Role
+  action       String    
+  model        String    
+  recordId     String
+  
+  
+  createdAt       DateTime  @default(now())
+
+  @@map("audit_logs")
+}
