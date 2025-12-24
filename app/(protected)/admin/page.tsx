@@ -2,7 +2,7 @@ import React from 'react'
 
  const AdminDashboard = () => {
   return (
-    <div>AdminDasboard</div>
+    <div>Admin Dasboard</div>
   )
 }
-export default AdminDashboard
+export default AdminDashboard;
