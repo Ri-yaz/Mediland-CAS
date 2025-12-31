@@ -34,7 +34,7 @@ export const Navbar = () => {
       <div className="flex items-center gap-4">
         <div className="relative">
           <Bell />
-          <p className="absolute -top-3 right-1 size-4 bg-blue-400 text-black rounded-full text-[10px] text-center">
+          <p className="absolute -top-3 right-1 size-4 bg-red-600 text-white rounded-full text-[10px] text-center">
             2
           </p>
         </div>

@@ -16,6 +16,7 @@ import {
   UsersRound,
 } from "lucide-react";
 import Link from "next/link";
+import NextImage from "next/image";
 import React from "react";
 import { LogoutButton } from "./logout-button";
 
@@ -164,14 +165,17 @@ export const Sidebar = async () => {
     <div className="w-full p-4 flex flex-col justify-between gap-4 bg-white overflow-y-scroll min-h-full">
       <div className="">
         <div className="flex items-center justify-center lg:justify-start gap-2">
-          <div className="p-1.5 rounded-md bg-blue-600 text-white">
-            <SquareActivity size={22} />
-          </div>
-          <Link
-            href={"/"}
-            className="hidden lg:flex text-base 2xl:text-xl font-bold"
-          >
-            Kinda HMS
+          <Link href="/" className="flex items-center gap-2">
+            <NextImage
+              src="/hospital.jpg"
+              alt="logo"
+              width={40}
+              height={40}
+              className="rounded-md object-cover"
+            />
+            <span className="hidden lg:flex text-base 2xl:text-xl font-bold">
+              Mediland-CAS
+            </span>
           </Link>
         </div>
 
