@@ -9,7 +9,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
       </div>
       <div className="hidden md:flex w-1/2 h-full relative">
         <Image
-          src="https://images.pexels.com/photos/6129437/pexels-photo-6129437.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+          src="/hospital.jpg"
           width={1000}
           height={1000}
           alt="Doctors"
@@ -17,7 +17,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         />
         <div className="absolute top-0 w-full h-full bg-black bg-opacity-40 z-10 flex flex-col items-center justify-center">
           <h1 className="text-3xl 2xl:text-5xl font-bold text-white">
-            Kinda HMS
+            Mediland-CAS
           </h1>
           <p className="text-blue-500 text-base">You're welcome</p>
         </div>

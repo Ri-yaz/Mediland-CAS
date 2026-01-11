@@ -70,7 +70,7 @@ export const PatientDetailsCard = ({ data }: { data: Patient }) => {
             </p>
           </div>
         </div>
-        <div className="flex items-start gap-3">
+        {/* <div className="flex items-start gap-3">
           <Info size={22} className="text-0gray-400" />
           <div>
             <p className="text-sm text-gray-500">Physician</p>
@@ -78,7 +78,7 @@ export const PatientDetailsCard = ({ data }: { data: Patient }) => {
               Dr Codewave, MBBS, FCPS
             </p>
           </div>
-        </div>
+        </div> */}
         <div className="flex items-start gap-3">
           <div>
             <p className="text-sm text-gray-500">Active Conditions</p>

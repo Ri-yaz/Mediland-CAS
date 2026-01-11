@@ -29,7 +29,7 @@ export const VitalSigns = async ({
   doctorId,
 }: VitalSignsProps) => {
   const data = await db.medicalRecords.findFirst({
-    where: { appointment_id: Number(id) },
+    where: { appointment_id: id as string },
     include: {
       vital_signs: {
         orderBy: { created_at: "desc" },

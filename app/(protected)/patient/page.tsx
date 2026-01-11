@@ -87,7 +87,7 @@ const PatientDashboard = async () => {
 
           <div className="w-full flex flex-wrap gap-5">
             {cardData?.map((el, id) => (
-              <StatCard key={id} {...el} link="#" />
+              <StatCard key={id} {...el} link="/record/appointments" />
             ))}
           </div>
         </div>

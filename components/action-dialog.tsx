@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
@@ -74,9 +75,9 @@ export const ActionDialog = ({
             </DialogTitle>
 
             <span className="text-xl text-black">Delete Confirmation</span>
-            <p className="text-sm">
+            <DialogDescription className="text-center text-sm">
               Are you sure you want to delete the selected record?
-            </p>
+            </DialogDescription>
 
             <div className="flex justify-center mt-6 items-center gap-x-3">
               <DialogClose asChild>
@@ -116,6 +117,9 @@ export const ActionDialog = ({
           <DialogTitle className="text-lg text-gray-600 font-semibold mb-4">
             Staff Information
           </DialogTitle>
+          <DialogDescription className="text-sm text-gray-500 mb-4">
+            View details for {data?.name}
+          </DialogDescription>
 
           <div className="flex justify-between">
             <div className="flex gap-3 items-center">

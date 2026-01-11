@@ -20,23 +20,23 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Form } from "../ui/form";
-import { ServicesSchema } from "@/lib/schema";
+import { ServiceSchema } from "@/lib/schema";
 import { CustomInput } from "../custom-input";
 
 export const AddService = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof ServicesSchema>>({
-    resolver: zodResolver(ServicesSchema),
+  const form = useForm<z.infer<typeof ServiceSchema>>({
+    resolver: zodResolver(ServiceSchema),
     defaultValues: {
-      service_name: undefined,
-      price: undefined,
-      description: undefined,
+      service_name: "",
+      price: "",
+      description: "",
     },
   });
 
-  const handleOnSubmit = async (values: z.infer<typeof ServicesSchema>) => {
+  const handleOnSubmit = async (values: z.infer<typeof ServiceSchema>) => {
     try {
       setIsLoading(true);
       const resp = await addNewService(values);
@@ -48,7 +48,7 @@ export const AddService = () => {
 
         form.reset();
       } else if (resp.error) {
-        toast.error(resp.msg);
+        toast.error(resp.message);
       }
     } catch (error) {
       console.log(error);

@@ -5,7 +5,9 @@ import { processAppointments } from "./patient";
 
 export async function getDoctors() {
   try {
-    const data = await db.doctor.findMany();
+    const data = await db.doctor.findMany({
+      where: { status: "ACTIVE" },
+    });
 
     return { success: true, data, status: 200 };
   } catch (error) {
@@ -20,12 +22,12 @@ export async function getDoctorDashboardStats() {
     const todayDate = new Date().getDay();
     const today = daysOfWeek[todayDate];
 
-    const [totalPatient, totalNurses, appointments, doctors] =
+    const [totalPatient, totalNurses, appointments, doctors, currentDoctor] =
       await Promise.all([
         db.patient.count(),
         db.staff.count({ where: { role: "NURSE" } }),
         db.appointment.findMany({
-          where: { doctor_id: userId!, appointment_date: { lte: new Date() } },
+          where: { doctor_id: userId! },
           include: {
             patient: {
               select: {
@@ -66,6 +68,10 @@ export async function getDoctorDashboardStats() {
           },
           take: 5,
         }),
+        db.doctor.findUnique({
+          where: { id: userId! },
+          select: { status: true },
+        }),
       ]);
 
     const { appointmentCounts, monthlyData } = await processAppointments(
@@ -75,6 +81,9 @@ export async function getDoctorDashboardStats() {
     const last5Records = appointments.slice(0, 5);
     // const availableDoctors = doctors.slice(0, 5);
 
+    // Explicitly cast or handle potential null status
+    const currentDoctorStatus = currentDoctor?.status || "PENDING";
+
     return {
       totalNurses,
       totalPatient,
@@ -83,6 +92,7 @@ export async function getDoctorDashboardStats() {
       availableDoctors: doctors,
       totalAppointment: appointments?.length,
       monthlyData,
+      status: currentDoctorStatus,
     };
   } catch (error) {
     console.log(error);
@@ -138,7 +148,7 @@ export async function getDoctorById(id: string) {
 export async function getRatingById(id: string) {
   try {
     const data = await db.rating.findMany({
-      where: { staff_id: id },
+      where: { doctor_id: id },
       include: {
         patient: { select: { last_name: true, first_name: true } },
       },
@@ -186,6 +196,7 @@ export async function getAllDoctors({
           ],
         },
         include: { working_days: true },
+        orderBy: { created_at: "desc" },
         skip: SKIP,
         take: LIMIT,
       }),

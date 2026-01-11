@@ -15,12 +15,6 @@ export const SettingsQuickLinks = () => {
         >
           Services
         </Link>
-        <Link
-          href="?cat=appointment"
-          className="px-4 py-2 rounded-lg bg-violet-100 text-violet-600"
-        >
-          Payment Methods
-        </Link>
 
         <Link
           href="?cat=medical-history"

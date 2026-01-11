@@ -30,6 +30,7 @@ interface InputProps {
   inputType?: "text" | "email" | "password" | "date";
   selectList?: { label: string; value: string }[];
   defaultValue?: string;
+  min?: string;
 }
 
 const RenderInput = ({ field, props }: { field: any; props: InputProps }) => {
@@ -40,14 +41,16 @@ const RenderInput = ({ field, props }: { field: any; props: InputProps }) => {
           <Input
             type={props.inputType}
             placeholder={props.placeholder}
+            min={props.min}
             {...field}
+            value={field.value ?? ""}
           />
         </FormControl>
       );
 
     case "select":
       return (
-        <Select onValueChange={field.onChange} value={field?.value}>
+        <Select onValueChange={field.onChange} value={field?.value ?? ""}>
           <FormControl>
             <SelectTrigger>
               <SelectValue placeholder={props.placeholder} />
@@ -68,6 +71,7 @@ const RenderInput = ({ field, props }: { field: any; props: InputProps }) => {
         <div className="items-top flex space-x-2">
           <Checkbox
             id={props.name}
+            checked={!!field.value}
             onCheckedChange={(e) => field.onChange(e === true || null)}
           />
           <div className="grid gap-1.5 leading-none">
@@ -87,8 +91,8 @@ const RenderInput = ({ field, props }: { field: any; props: InputProps }) => {
         <div className="w-full">
           <FormLabel>{props.label}</FormLabel>
           <RadioGroup
-            defaultValue={props.defaultValue}
-            onChange={field.onChange}
+            value={field.value ?? ""}
+            onValueChange={field.onChange}
             className="flex gap-4"
           >
             {props?.selectList?.map((i, id) => (
@@ -114,9 +118,9 @@ const RenderInput = ({ field, props }: { field: any; props: InputProps }) => {
       return (
         <FormControl>
           <Textarea
-            type={props.inputType}
             placeholder={props.placeholder}
             {...field}
+            value={field.value ?? ""}
           ></Textarea>
         </FormControl>
       );
@@ -159,19 +163,16 @@ export const SwitchInput = ({ data, setWorkSchedule }: SwitchProps) => {
     setWorkSchedule((prevDays) => {
       const dayExist = prevDays.find((d) => d.day === day);
 
-      if (dayExist) {
+      if (field === "CHECK_STATE") {
+        if (value === "true") {
+          return [...prevDays, { day, start_time: "09:00", close_time: "17:00" }];
+        } else {
+          return prevDays.filter((d) => d.day !== day);
+        }
+      } else {
         return prevDays.map((d) =>
           d.day === day ? { ...d, [field]: value } : d
         );
-      } else {
-        if (field === true) {
-          return [
-            ...prevDays,
-            { day, start_time: "09:00", close_time: "17:00" },
-          ];
-        } else {
-          return [...prevDays, { day, [field]: value }];
-        }
       }
     });
   };
@@ -186,7 +187,7 @@ export const SwitchInput = ({ data, setWorkSchedule }: SwitchProps) => {
           <Switch
             id={el.value}
             className="data-[state=checked]:bg-blue-600 peer"
-            onCheckedChange={(e) => handleChange(el.value, true, "09:00")}
+            onCheckedChange={(e) => handleChange(el.value, "CHECK_STATE", String(e))}
           />
           <Label htmlFor={el.value} className="w-20 capitalize">
             {el.value}

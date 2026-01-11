@@ -5,7 +5,7 @@ import SearchInput from "@/components/search-input";
 import { Table } from "@/components/tables/table";
 import { ViewAppointment } from "@/components/view-appointment";
 import { checkRole, getRole } from "@/utils/roles";
-import { DATA_LIMIT } from "@/utils/seetings";
+import { DATA_LIMIT } from "@/utils/specializations";
 import { getPatientAppointments } from "@/utils/services/appointment";
 import { auth } from "@clerk/nextjs/server";
 import { Appointment, Doctor, Patient } from "@prisma/client";
@@ -61,25 +61,20 @@ const Appointments = async (props: {
   const searchQuery = searchParams?.q || "";
   const id = searchParams?.id || undefined;
 
-  let queryId = undefined;
-
-  if (
-    userRole == "admin" ||
-    (userRole == "doctor" && id) ||
-    (userRole === "nurse" && id)
-  ) {
-    queryId = id;
-  } else if (userRole === "doctor" || userRole === "patient") {
-    queryId = userId;
-  } else if (userRole === "nurse") {
-    queryId = undefined;
-  }
+  const queryId =
+    userRole === "admin"
+      ? id
+      : userRole === "doctor"
+        ? id || userId!
+        : userRole === "patient"
+          ? userId!
+          : id;
 
   const { data, totalPages, totalRecord, currentPage } =
     await getPatientAppointments({
       page,
       search: searchQuery,
-      id: queryId!,
+      id: queryId,
     });
 
   if (!data) return null;
@@ -107,7 +102,7 @@ const Appointments = async (props: {
         </td>
 
         <td className="hidden md:table-cell">
-          {format(item?.appointment_date, "yyyy-MM-dd")}
+          {format(new Date(item?.appointment_date), "yyyy-MM-dd")}
         </td>
         <td className="hidden md:table-cell">{item.time}</td>
 
@@ -134,7 +129,7 @@ const Appointments = async (props: {
         </td>
         <td>
           <div className="flex items-center gap-2">
-            <ViewAppointment id={item?.id.toString()} />
+            <ViewAppointment id={item?.id} />
             <AppointmentActionOptions
               userId={userId!}
               patientId={item?.patient_id}

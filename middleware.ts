@@ -11,12 +11,12 @@ export default clerkMiddleware(async (auth, req) => {
   const { userId, sessionClaims } = await auth();
   const url = new URL(req.url);
 
-  const role =
+  const role: string =
     userId && sessionClaims?.metadata?.role
       ? sessionClaims.metadata.role
       : userId
-      ? "patient"
-      : "sign-in";
+        ? "patient"
+        : "sign-in";
 
   const matchingRoute = matchers.find(({ matcher }) => matcher(req));
 
@@ -25,8 +25,16 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(new URL(`/${role}`, url.origin));
   }
 
+  // Set the current path in headers so server components can access it
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-url", url.pathname);
+
   // Continue if the user is authorized
-  return NextResponse.next();
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 });
 
 export const config = {

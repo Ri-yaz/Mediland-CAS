@@ -34,7 +34,7 @@ const DoctorProfile = async (props: { params: Promise<{ id: string }> }) => {
 
             <div className="w-2/3 flex flex-col justify-between gap-x-4">
               <div className="flex items-center gap-4">
-                <h1 className="text=xl font-semibold uppercase">
+                <h1 className="text-xl font-semibold uppercase">
                   {data?.name}
                 </h1>
               </div>

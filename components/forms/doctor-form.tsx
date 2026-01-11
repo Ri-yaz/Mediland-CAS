@@ -17,7 +17,7 @@ import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import { Form } from "../ui/form";
 import { CustomInput, SwitchInput } from "../custom-input";
-import { SPECIALIZATION } from "@/utils/seetings";
+import { SPECIALIZATION } from "@/utils/specializations";
 import { Label } from "../ui/label";
 import { toast } from "sonner";
 import { createNewDoctor } from "@/app/actions/admin";
@@ -45,6 +45,7 @@ type Day = {
 
 export const DoctorForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
   const router = useRouter();
   const [workSchedule, setWorkSchedule] = useState<Day[]>([]);
 
@@ -83,6 +84,7 @@ export const DoctorForm = () => {
         setWorkSchedule([]);
         form.reset();
         router.refresh();
+        setOpen(false);
       } else if (resp.error) {
         toast.error(resp.message);
       }
@@ -109,12 +111,12 @@ export const DoctorForm = () => {
   }, [selectedSpecialization]);
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button>
+        {/* <Button>
           <Plus size={20} />
           Add Doctor
-        </Button>
+        </Button> */}
       </SheetTrigger>
 
       <SheetContent className="rounded-xl rounded-r-xl md:h-[90%] md:top-[5%] md:right-[1%] w-full overflow-y-scroll">

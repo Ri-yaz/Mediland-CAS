@@ -1,5 +1,7 @@
 import { MedicalHistoryContainer } from "@/components/medical-history-container";
+import { PaymentsContainer } from "@/components/appointment/payment-container";
 import { PatientRatingContainer } from "@/components/patient-rating-container";
+import { PatientLabTestContainer } from "@/components/patient-lab-test-container";
 import { ProfileImage } from "@/components/profile-image";
 import { Card } from "@/components/ui/card";
 import { getPatientFullDataById } from "@/utils/services/patient";
@@ -105,7 +107,8 @@ const PatientProfile = async (props: ParamsProps) => {
             <MedicalHistoryContainer patientId={id} />
           )}
 
-          {/* {cat === "payments" && <Payments patientId={id!} />} */}
+
+          {cat === "lab-test" && <PatientLabTestContainer patientId={id} />}
         </div>
       </div>
 
@@ -126,17 +129,11 @@ const PatientProfile = async (props: ParamsProps) => {
             >
               Medical Records
             </Link>
-            <Link
-              className="p-3 rounded-md bg-violet-100"
-              href={`?cat=payments`}
-            >
-              Medical Bills
-            </Link>
             <Link className="p-3 rounded-md bg-pink-50" href={`/`}>
               Dashboard
             </Link>
 
-            <Link className="p-3 rounded-md bg-rose-100" href={`#`}>
+            <Link className="p-3 rounded-md bg-rose-100" href={`?cat=lab-test`}>
               Lab Test & Result
             </Link>
             {patientId === "self" && (

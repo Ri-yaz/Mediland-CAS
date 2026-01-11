@@ -3,26 +3,28 @@
 import db from "@/lib/db";
 import {
   DoctorSchema,
-  ServicesSchema,
+  ServiceSchema,
   StaffSchema,
   WorkingDaysSchema,
 } from "@/lib/schema";
 import { generateRandomColor } from "@/utils";
 import { checkRole } from "@/utils/roles";
 import { auth, clerkClient } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 export async function createNewStaff(data: any) {
   try {
     const { userId } = await auth();
 
     if (!userId) {
-      return { success: false, msg: "Unauthorized" };
+      return { success: false, message: "Unauthorized" };
     }
 
     const isAdmin = await checkRole("ADMIN");
 
     if (!isAdmin) {
-      return { success: false, msg: "Unauthorized" };
+      return { success: false, message: "Unauthorized" };
     }
 
     const values = StaffSchema.safeParse(data);
@@ -30,86 +32,116 @@ export async function createNewStaff(data: any) {
     if (!values.success) {
       return {
         success: false,
-        errors: true,
-        message: "Please provide all required info",
+        error: true,
+        message: values.error.errors[0].message,
       };
     }
 
     const validatedValues = values.data;
-
     const client = await clerkClient();
+
+    const nameParts = validatedValues.name.trim().split(/\s+/);
+    const firstName = nameParts[0];
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "Staff";
 
     const user = await client.users.createUser({
       emailAddress: [validatedValues.email],
       password: validatedValues.password,
-      firstName: validatedValues.name.split(" ")[0],
-      lastName: validatedValues.name.split(" ")[1],
-      publicMetadata: { role: "doctor" },
+      firstName,
+      lastName,
+      publicMetadata: { role: validatedValues.role.toLowerCase() },
     });
 
-    delete validatedValues["password"];
+    const { password, ...staffData } = validatedValues;
 
-    const doctor = await db.staff.create({
+    await db.staff.create({
       data: {
-        name: validatedValues.name,
-        phone: validatedValues.phone,
-        email: validatedValues.email,
-        address: validatedValues.address,
-        role: validatedValues.role,
-        license_number: validatedValues.license_number,
-        department: validatedValues.department,
+        ...staffData,
+        role: validatedValues.role as any,
         colorCode: generateRandomColor(),
         id: user.id,
         status: "ACTIVE",
       },
     });
 
+    revalidatePath("/record/staffs");
+
     return {
       success: true,
-      message: "Doctor added successfully",
+      message: "Staff added successfully",
       error: false,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.log(error);
-    return { error: true, success: false, message: "Something went wrong" };
+    const message = error?.errors?.[0]?.message || error?.message || "Something went wrong";
+    return { error: true, success: false, message };
   }
 }
-export async function createNewDoctor(data: any) {
-  try {
-    const values = DoctorSchema.safeParse(data);
 
+export async function createNewDoctor(data: z.infer<typeof DoctorSchema> & { work_schedule: any[] }) {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    const isAdmin = await checkRole("ADMIN");
+
+    if (!isAdmin) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    const values = DoctorSchema.safeParse(data);
     const workingDaysValues = WorkingDaysSchema.safeParse(data?.work_schedule);
 
-    if (!values.success || !workingDaysValues.success) {
+    if (!values.success) {
       return {
         success: false,
-        errors: true,
-        message: "Please provide all required info",
+        error: true,
+        message: values.error.errors[0].message,
+      };
+    }
+
+    if (!workingDaysValues.success) {
+      return {
+        success: false,
+        error: true,
+        message: "Invalid work schedule data",
       };
     }
 
     const validatedValues = values.data;
     const workingDayData = workingDaysValues.data!;
-
     const client = await clerkClient();
 
+    const nameParts = validatedValues.name.trim().split(/\s+/);
+    const firstName = nameParts[0];
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "Doctor";
+
+    // Create Clerk User
     const user = await client.users.createUser({
       emailAddress: [validatedValues.email],
       password: validatedValues.password,
-      firstName: validatedValues.name.split(" ")[0],
-      lastName: validatedValues.name.split(" ")[1],
+      firstName,
+      lastName,
       publicMetadata: { role: "doctor" },
     });
 
-    delete validatedValues["password"];
+    const { password, ...doctorData } = validatedValues;
+    const colorCode = generateRandomColor();
 
+    // Create Doctor Record
     const doctor = await db.doctor.create({
       data: {
-        ...validatedValues,
+        ...doctorData,
         id: user.id,
+        colorCode,
       },
     });
 
+
+    // Create Working Days
     await Promise.all(
       workingDayData?.map((el) =>
         db.workingDays.create({
@@ -118,20 +150,40 @@ export async function createNewDoctor(data: any) {
       )
     );
 
+    revalidatePath("/record/doctors");
+    revalidatePath("/record/staffs");
+
     return {
       success: true,
       message: "Doctor added successfully",
       error: false,
     };
-  } catch (error) {
-    console.log(error);
-    return { error: true, success: false, message: "Something went wrong" };
+  } catch (error: any) {
+    console.error("Error creating doctor:", error);
+
+    // Extract more specific error message if available (e.g. Clerk or Prisma)
+    let message = "Something went wrong";
+    if (error?.errors?.[0]?.message) {
+      message = error.errors[0].message;
+    } else if (error?.message) {
+      if (error.message.includes("Unique constraint failed")) {
+        message = "A user with this email or license number already exists.";
+      } else {
+        message = error.message;
+      }
+    }
+
+    return { error: true, success: false, message };
   }
 }
 
 export async function addNewService(data: any) {
   try {
-    const isValidData = ServicesSchema.safeParse(data);
+    const isValidData = ServiceSchema.safeParse(data);
+
+    if (!isValidData.success) {
+      return { success: false, error: true, message: "Invalid data" };
+    }
 
     const validatedData = isValidData.data;
 
@@ -142,10 +194,10 @@ export async function addNewService(data: any) {
     return {
       success: true,
       error: false,
-      msg: `Service added successfully`,
+      message: `Service added successfully`,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.log(error);
-    return { success: false, msg: "Internal Server Error" };
+    return { success: false, error: true, message: "Internal Server Error" };
   }
 }

@@ -11,7 +11,7 @@ interface ActionsProps {
   status: string;
   patientId: string;
   doctorId: string;
-  appointmentId: number;
+  appointmentId: string;
 }
 
 export const AppointmentActionOptions = async ({

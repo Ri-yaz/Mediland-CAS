@@ -8,12 +8,14 @@ import { Table } from "@/components/tables/table";
 import { Button } from "@/components/ui/button";
 import { SearchParamsProps } from "@/types";
 import { checkRole } from "@/utils/roles";
-import { DATA_LIMIT } from "@/utils/seetings";
+import { DATA_LIMIT } from "@/utils/specializations";
 import { getAllDoctors } from "@/utils/services/doctor";
 import { Doctor } from "@prisma/client";
 import { format } from "date-fns";
 import { Users } from "lucide-react";
 import React from "react";
+import { DoctorApprovalActions } from "@/components/doctor-approval-actions";
+import { DoctorStatusSelector } from "@/components/doctor-status-selector";
 
 const columns = [
   {
@@ -34,6 +36,10 @@ const columns = [
     header: "Email",
     key: "email",
     className: "hidden lg:table-cell",
+  },
+  {
+    header: "Status",
+    key: "status",
   },
   {
     header: "Joined Date",
@@ -79,14 +85,25 @@ const DoctorsList = async (props: SearchParamsProps) => {
       <td className="hidden md:table-cell">{item?.license_number}</td>
       <td className="hidden md:table-cell">{item?.phone}</td>
       <td className="hidden lg:table-cell">{item?.email}</td>
+      <td>
+        <DoctorStatusSelector
+          id={item.id}
+          currentStatus={(item as any).status}
+        />
+      </td>
       <td className="hidden xl:table-cell">
         {format(item?.created_at, "yyyy-MM-dd")}
       </td>
       <td>
         <div className="flex items-center gap-2">
-          <ViewAction href={`doctors/${item?.id}`} />
+          <ViewAction href={`/record/doctors/${item?.id}`} />
           {isAdmin && (
-            <ActionDialog type="delete" id={item?.id} deleteType="doctor" />
+            <>
+              <ActionDialog type="delete" id={item?.id} deleteType="doctor" />
+              {(item as any).status === 'PENDING' && (
+                <DoctorApprovalActions id={item.id} />
+              )}
+            </>
           )}
         </div>
       </td>

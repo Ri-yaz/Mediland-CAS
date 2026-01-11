@@ -1,4 +1,5 @@
 import { getRole } from "@/utils/roles";
+import { checkDoctorStatus } from "@/utils/check-doctor-status";
 import {
   Bell,
   LayoutDashboard,
@@ -34,6 +35,7 @@ const SidebarIcon = ({ icon: Icon }: { icon: LucideIcon }) => {
 
 export const Sidebar = async () => {
   const role = await getRole();
+  const { isDoctor, status: doctorStatus } = await checkDoctorStatus();
 
   const SIDEBAR_LINKS = [
     {
@@ -93,12 +95,6 @@ export const Sidebar = async () => {
           icon: SquareActivity,
         },
         {
-          name: "Billing Overview",
-          href: "/record/billing",
-          access: ["admin", "doctor"],
-          icon: Receipt,
-        },
-        {
           name: "Patient Management",
           href: "/nurse/patient-management",
           access: ["nurse"],
@@ -124,15 +120,9 @@ export const Sidebar = async () => {
         },
         {
           name: "Prescription",
-          href: "#",
+          href: "/patient/prescription",
           access: ["patient"],
           icon: Pill,
-        },
-        {
-          name: "Billing",
-          href: "/patient/self?cat=payments",
-          access: ["patient"],
-          icon: Receipt,
         },
       ],
     },
@@ -142,7 +132,7 @@ export const Sidebar = async () => {
         {
           name: "Notifications",
           href: "/notifications",
-          access: ACCESS_LEVELS_ALL,
+          access: ACCESS_LEVELS_ALL.filter((role) => role !== "doctor"),
           icon: Bell,
         },
         {
@@ -167,7 +157,7 @@ export const Sidebar = async () => {
         <div className="flex items-center justify-center lg:justify-start gap-2">
           <Link href="/" className="flex items-center gap-2">
             <NextImage
-              src="/hospital.jpg"
+              src="/mediland.jpg"
               alt="logo"
               width={40}
               height={40}
@@ -187,18 +177,26 @@ export const Sidebar = async () => {
               </span>
 
               {el.links.map((link) => {
-                if (link.access.includes(role.toLowerCase())) {
-                  return (
-                    <Link
-                      href={link.href}
-                      className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-blue-600/10"
-                      key={link.name}
-                    >
-                      <SidebarIcon icon={link.icon} />
-                      <span className="hidden lg:block">{link.name}</span>
-                    </Link>
-                  );
+                // Check if user has access to this link based on role
+                if (!link.access.includes(role.toLowerCase())) {
+                  return null;
                 }
+
+                // For unauthorized doctors (PENDING status), only show Dashboard
+                if (isDoctor && doctorStatus === "PENDING" && link.href !== "/") {
+                  return null;
+                }
+
+                return (
+                  <Link
+                    href={link.href}
+                    className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-blue-600/10"
+                    key={link.name}
+                  >
+                    <SidebarIcon icon={link.icon} />
+                    <span className="hidden lg:block">{link.name}</span>
+                  </Link>
+                );
               })}
             </div>
           ))}

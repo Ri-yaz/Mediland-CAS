@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  engineType = "library"
 }
 
 datasource db {
@@ -88,7 +89,7 @@ model Patient {
 }
 
 model Doctor {
-  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                    String   @id @map("_id") // clerk userId
   email                 String   @unique
   name                  String
   specialization        String
@@ -99,6 +100,7 @@ model Doctor {
   img                   String?
   colorCode             String?
   availability_status   String?
+  status                String   @default("PENDING")
 
   type                  JOBTYPE @default(FULL)
   working_days          WorkingDays[]
@@ -115,7 +117,7 @@ model Doctor {
 
 model WorkingDays {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  doctor_id       String   @db.ObjectId
+  doctor_id       String   
   day             String
   start_time      String
   close_time      String
@@ -130,7 +132,7 @@ model WorkingDays {
 
 
 model Staff {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  id            String   @id @map("_id") // clerk userId
   email         String   @unique
   name          String
   phone         String
@@ -152,15 +154,15 @@ model Staff {
 
 model Appointment {
   id                String   @id @default(auto()) @map("_id") @db.ObjectId
-  patient_id        String
-  doctor_id         String   @db.ObjectId
+  patient_id        String?
+  doctor_id         String?
   appointment_date  DateTime
   time              String
   status            AppointmentStatus @default(PENDING)
   type              String
   note              String?
-  patient           Patient  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
-  doctor            Doctor   @relation(fields: [doctor_id], references: [id],  onDelete:  Cascade)
+  patient           Patient?  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  doctor            Doctor?   @relation(fields: [doctor_id], references: [id],  onDelete:  Cascade)
 
   bills             Payment[]
   medical           MedicalRecords[]
@@ -221,9 +223,10 @@ model LabTest {
   test_date     DateTime
   result        String
   status        String
+  test_type     String?
   notes         String?
-  service_id    String   @unique @db.ObjectId
-  services      Services @relation(fields: [service_id], references: [id])
+  service_id    String?   @db.ObjectId
+  services      Services? @relation(fields: [service_id], references: [id])
 
   medical_record MedicalRecords  @relation(fields: [record_id], references: [id], onDelete: Cascade)
 
@@ -237,7 +240,7 @@ model MedicalRecords {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   patient_id      String
   appointment_id  String   @db.ObjectId
-  doctor_id       String   @db.ObjectId
+  doctor_id       String
   treatment_plan  String?
   prescriptions   String?
   lab_request     String?
@@ -278,17 +281,17 @@ model VitalSigns {
 
 model Diagnosis {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  patient_id      String
-  medical_id      String   @db.ObjectId
-  doctor_id       String   @db.ObjectId
-  doctor          Doctor    @relation(fields: [doctor_id], references: [id])
+  patient_id      String?
+  medical_id      String?   @db.ObjectId
+  doctor_id       String?
+  doctor          Doctor?    @relation(fields: [doctor_id], references: [id])
   symptoms        String    
   diagnosis       String    
   notes           String?   
   prescribed_medications String?   
   follow_up_plan   String?
 
-  medical          MedicalRecords @relation(fields: [medical_id ], references: [id], onDelete: Cascade)
+  medical          MedicalRecords? @relation(fields: [medical_id ], references: [id], onDelete: Cascade)
 
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
@@ -312,13 +315,13 @@ model AuditLog {
 
 model Rating {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  staff_id   String   @db.ObjectId
-  patient_id String
+  doctor_id  String?   
+  patient_id String?
   rating     Int      
   comment    String?  
 
-  doctor     Doctor   @relation(fields: [staff_id], references: [id], onDelete: Cascade)
-  patient    Patient  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
+  doctor     Doctor?   @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+  patient    Patient?  @relation(fields: [patient_id], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -331,11 +334,23 @@ model Services {
   service_name    String
   description     String
   price           Float
-  labtest         LabTest?
+  labtests        LabTest[]
   bills           PatientBills[]
 
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
   @@map("services")
+}
+
+model Notification {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   
+  message     String
+  isRead      Boolean  @default(false)
+  
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("notifications")
 }

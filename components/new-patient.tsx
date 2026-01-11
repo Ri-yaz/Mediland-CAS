@@ -26,8 +26,9 @@ import { toast } from "sonner";
 interface DataProps {
   data?: Patient;
   type: "create" | "update";
+  patientId?: string;
 }
-export const NewPatient = ({ data, type }: DataProps) => {
+export const NewPatient = ({ data, type, patientId }: DataProps) => {
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [imgURL, setImgURL] = useState<any>();
@@ -66,20 +67,22 @@ export const NewPatient = ({ data, type }: DataProps) => {
   ) => {
     setLoading(true);
 
+    const targetId = patientId || userId;
+
     const res =
       type === "create"
-        ? await createNewPatient(values, userId!)
-        : await updatePatient(values, userId!);
+        ? await createNewPatient(values, targetId!)
+        : await updatePatient(values, targetId!);
 
     setLoading(false);
 
     if (res?.success) {
-      toast.success(res.msg);
+      toast.success(res.message);
       form.reset();
       router.push("/patient");
     } else {
       console.log(res);
-      toast.error("Failed to create patient");
+      toast.error(res?.message || "Failed to create patient");
     }
   };
 

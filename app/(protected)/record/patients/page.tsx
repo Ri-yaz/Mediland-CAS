@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button";
 import { SearchParamsProps } from "@/types";
 import { calculateAge } from "@/utils";
 import { checkRole } from "@/utils/roles";
-import { DATA_LIMIT } from "@/utils/seetings";
+import { DATA_LIMIT } from "@/utils/specializations";
 import { getAllPatients } from "@/utils/services/patient";
 import { Patient } from "@prisma/client";
 import { format } from "date-fns";
 import { UserPen, Users } from "lucide-react";
+import Link from "next/link";
 
 const columns = [
   {
@@ -125,10 +126,12 @@ const PatientList = async (props: SearchParamsProps) => {
 
             <ActionOptions>
               <div className="space-y-3">
-                <Button variant={"ghost"} className="text-xs font-light">
-                  <UserPen size={16} />
-                  Edit
-                </Button>
+                <Link href={`/record/patients/${item.id}/edit`}>
+                  <Button variant={"ghost"} className="text-xs font-light w-full justify-start gap-2">
+                    <UserPen size={16} />
+                    Edit
+                  </Button>
+                </Link>
 
                 {isAdmin && (
                   <ActionDialog

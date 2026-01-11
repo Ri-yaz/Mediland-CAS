@@ -1,15 +1,12 @@
-import { AvailableDoctors } from "@/components/available-doctor";
 import { AppointmentChart } from "@/components/charts/appointment-chart";
 import { StatSummary } from "@/components/charts/stat-summary";
 import { StatCard } from "@/components/stat-card";
 import { RecentAppointments } from "@/components/tables/recent-appointment";
 import { Button } from "@/components/ui/button";
-import { checkRole, getRole } from "@/utils/roles";
 import { getDoctorDashboardStats } from "@/utils/services/doctor";
 import { currentUser } from "@clerk/nextjs/server";
 import { BriefcaseBusiness, BriefcaseMedical, User, Users } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import React from "react";
 
 const DoctorDashboard = async () => {
@@ -23,7 +20,30 @@ const DoctorDashboard = async () => {
     availableDoctors,
     monthlyData,
     last5Records,
+    status,
   } = await getDoctorDashboardStats();
+
+  if (status === "PENDING") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] p-6 bg-white rounded-xl shadow-sm">
+        <div className="bg-yellow-100 p-4 rounded-full mb-6 text-yellow-600">
+          <BriefcaseBusiness size={48} />
+        </div>
+        <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">Registration Pending</h1>
+        <p className="text-gray-600 text-center max-w-md mb-8">
+          Welcome, Dr. {user?.firstName}! Your account has been created successfully, but it requires approval from an administrator before you can access the full dashboard.
+        </p>
+        <div className="flex gap-4">
+          <Button variant="outline" asChild>
+            <Link href="/">Back to Home</Link>
+          </Button>
+          <Button disabled>
+            Awaiting Approval
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const cardData = [
     {
@@ -108,8 +128,6 @@ const DoctorDashboard = async () => {
         <div className="w-full h-[450px] mb-8">
           <StatSummary data={appointmentCounts} total={totalAppointment!} />
         </div>
-
-        <AvailableDoctors data={availableDoctors as any} />
       </div>
     </div>
   );

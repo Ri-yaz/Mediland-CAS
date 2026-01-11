@@ -12,7 +12,7 @@ export async function updatePatient(data: any, pid: string) {
       return {
         success: false,
         error: true,
-        msg: "Provide all required fields",
+        message: "Provide all required fields",
       };
     }
 
@@ -34,13 +34,15 @@ export async function updatePatient(data: any, pid: string) {
     return {
       success: true,
       error: false,
-      msg: "Patient info updated successfully",
+      message: "Patient info updated successfully",
     };
   } catch (error: any) {
     console.error(error);
-    return { success: false, error: true, msg: error?.message };
+    const message = error?.errors?.[0]?.message || error?.message || "Something went wrong";
+    return { success: false, error: true, message };
   }
 }
+
 export async function createNewPatient(data: any, pid: string) {
   try {
     const validateData = PatientFormSchema.safeParse(data);
@@ -49,7 +51,7 @@ export async function createNewPatient(data: any, pid: string) {
       return {
         success: false,
         error: true,
-        msg: "Provide all required fields",
+        message: "Provide all required fields",
       };
     }
 
@@ -80,9 +82,46 @@ export async function createNewPatient(data: any, pid: string) {
       },
     });
 
-    return { success: true, error: false, msg: "Patient created successfully" };
+    return { success: true, error: false, message: "Patient created successfully" };
   } catch (error: any) {
     console.error(error);
-    return { success: false, error: true, msg: error?.message };
+    const message = error?.errors?.[0]?.message || error?.message || "Something went wrong";
+    return { success: false, error: true, message };
+  }
+}
+
+export async function createRating(data: {
+  doctor_id: string;
+  patient_id: string;
+  rating: number;
+  comment?: string;
+}) {
+  try {
+    if (!data.doctor_id || !data.patient_id || !data.rating) {
+      return {
+        success: false,
+        message: "Provide all required fields",
+      };
+    }
+
+    await db.rating.create({
+      data: {
+        doctor_id: data.doctor_id,
+        patient_id: data.patient_id,
+        rating: data.rating,
+        comment: data.comment,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Review submitted successfully",
+    };
+  } catch (error: any) {
+    console.error(error);
+    return {
+      success: false,
+      message: "Internal Server Error",
+    };
   }
 }

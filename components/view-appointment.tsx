@@ -20,7 +20,7 @@ import { auth } from "@clerk/nextjs/server";
 import { AppointmentAction } from "./appointment-action";
 
 export const ViewAppointment = async ({ id }: { id: string | undefined }) => {
-  const { data } = await getAppointmentById(Number(id!));
+  const { data } = await getAppointmentById(id as string);
   const { userId } = await auth();
 
   if (!data) return null;

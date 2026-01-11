@@ -85,3 +85,30 @@ export async function getMedicalRecords({
     return { success: false, message: "Internal Server Error", status: 500 };
   }
 }
+
+export async function getPatientPrescriptions(userId: string) {
+  try {
+    const data = await db.medicalRecords.findMany({
+      where: { patient_id: userId },
+      select: {
+        id: true,
+        created_at: true,
+        prescriptions: true,
+        diagnosis: {
+          select: {
+            prescribed_medications: true,
+            doctor: {
+              select: { name: true }
+            }
+          }
+        }
+      },
+      orderBy: { created_at: "desc" }
+    });
+
+    return { success: true, data };
+  } catch (error) {
+    console.log(error);
+    return { success: false, message: "Internal Server Error" };
+  }
+}

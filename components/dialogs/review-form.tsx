@@ -32,7 +32,7 @@ import { createReview } from "@/app/actions/general";
 
 export const reviewSchema = z.object({
   patient_id: z.string(),
-  staff_id: z.string(),
+  doctor_id: z.string(),
   rating: z.number().min(1).max(5),
   comment: z
     .string()
@@ -42,7 +42,7 @@ export const reviewSchema = z.object({
 
 export type ReviewFormValues = z.infer<typeof reviewSchema>;
 
-export const ReviewForm = ({ staffId }: { staffId: string }) => {
+export const ReviewForm = ({ doctorId }: { doctorId: string }) => {
   const router = useRouter();
   const user = useAuth();
   const [loading, setLoading] = useState(false);
@@ -51,7 +51,7 @@ export const ReviewForm = ({ staffId }: { staffId: string }) => {
     resolver: zodResolver(reviewSchema),
     defaultValues: {
       patient_id: user?.userId as string,
-      staff_id: staffId,
+      doctor_id: doctorId,
       rating: 1,
       comment: "",
     },

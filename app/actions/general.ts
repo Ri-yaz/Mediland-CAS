@@ -5,7 +5,7 @@ import {
   reviewSchema,
 } from "@/components/dialogs/review-form";
 import db from "@/lib/db";
-import { clerkClient } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 
 export async function deleteDataById(
   id: string,
@@ -16,12 +16,19 @@ export async function deleteDataById(
     switch (deleteType) {
       case "doctor":
         await db.doctor.delete({ where: { id: id } });
+        break;
       case "staff":
         await db.staff.delete({ where: { id: id } });
+        break;
       case "patient":
         await db.patient.delete({ where: { id: id } });
+        break;
       case "payment":
-        await db.payment.delete({ where: { id: Number(id) } });
+        await db.payment.delete({ where: { id: id } });
+        break;
+      case "bill":
+        await db.patientBills.delete({ where: { id: id } });
+        break;
     }
 
     if (
@@ -31,6 +38,19 @@ export async function deleteDataById(
     ) {
       const client = await clerkClient();
       await client.users.deleteUser(id);
+    }
+
+    const { userId: performerId } = await auth();
+    if (performerId) {
+      await db.auditLog.create({
+        data: {
+          user_id: performerId,
+          record_id: id,
+          action: "DELETE",
+          model: deleteType.toUpperCase(),
+          details: `Deleted ${deleteType} with ID: ${id}`,
+        },
+      });
     }
 
     return {

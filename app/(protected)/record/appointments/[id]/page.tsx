@@ -1,12 +1,13 @@
 import { AppointmentDetails } from "@/components/appointment/appointment-details";
 import AppointmentQuickLinks from "@/components/appointment/appointment-quick-links";
-import { BillsContainer } from "@/components/appointment/bills-container";
+
 import ChartContainer from "@/components/appointment/chart-container";
 import { DiagnosisContainer } from "@/components/appointment/diagnosis-container";
 import { PatientDetailsCard } from "@/components/appointment/patient-details-card";
-import { PaymentsContainer } from "@/components/appointment/payment-container";
+
 import { VitalSigns } from "@/components/appointment/vital-signs";
 import { MedicalHistoryContainer } from "@/components/medical-history-container";
+import { LabTestContainer } from "@/components/appointment/lab-test-container";
 import { getAppointmentWithMedicalRecordsById } from "@/utils/services/appointment";
 
 const AppointmentDetailsPage = async ({
@@ -21,6 +22,14 @@ const AppointmentDetailsPage = async ({
   const cat = (search?.cat as string) || "charts";
 
   const { data } = await getAppointmentWithMedicalRecordsById(id);
+
+  if (!data) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-lg font-semibold">Appointment data not found</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex p-6 flex-col-reverse lg:flex-row w-full min-h-screen gap-10">
@@ -54,14 +63,11 @@ const AppointmentDetailsPage = async ({
         {cat === "medical-history" && (
           <MedicalHistoryContainer id={id!} patientId={data?.patient_id!} />
         )}
-        {cat === "billing" && <BillsContainer id={id} />}
-        {cat === "payments" && (
-          <PaymentsContainer patientId={data?.patient_id!} />
-        )}
+        {cat === "lab-test" && <LabTestContainer id={id} />}
       </div>
       {/* RIGHT */}
       <div className="flex-1 space-y-6">
-        <AppointmentQuickLinks staffId={data?.doctor_id as string} />
+        <AppointmentQuickLinks doctorId={data?.doctor_id as string} />
         <PatientDetailsCard data={data?.patient!} />
       </div>
     </div>

@@ -47,7 +47,16 @@ export const getVitalSignData = async (id: string) => {
   const totalValue1 = formattedData?.reduce((sum, acc) => sum + acc.value1, 0);
   const totalValue2 = formattedData?.reduce((sum, acc) => sum + acc.value2, 0);
 
-  const count = data?.length;
+  const count = data?.length || 0;
+
+  if (count === 0) {
+    return {
+      data: [],
+      average: "0/0 mg/dL",
+      heartRateData: [],
+      averageHeartRate: "0-0 bpm",
+    };
+  }
 
   const averageSystolic = totalSystolic / count;
   const averageDiastolic = totalDiastolic / count;

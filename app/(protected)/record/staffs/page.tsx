@@ -9,7 +9,7 @@ import { Table } from "@/components/tables/table";
 import { Button } from "@/components/ui/button";
 import { SearchParamsProps } from "@/types";
 import { checkRole } from "@/utils/roles";
-import { DATA_LIMIT } from "@/utils/seetings";
+import { DATA_LIMIT } from "@/utils/specializations";
 import { getAllStaff } from "@/utils/services/staff";
 import { Doctor, Staff } from "@prisma/client";
 import { format } from "date-fns";

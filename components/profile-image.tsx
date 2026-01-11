@@ -42,4 +42,6 @@ export const ProfileImage = ({
       </div>
     );
   }
+
+  return null;
 };

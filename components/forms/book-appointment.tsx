@@ -85,7 +85,9 @@ export const BookAppointment = ({
       if (res.success) {
         form.reset({});
         router.refresh();
-        toast.success("Appointment created successfully");
+        toast.success(res.message);
+      } else {
+        toast.error(res.message);
       }
     } catch (error) {
       console.log(error);
@@ -106,7 +108,7 @@ export const BookAppointment = ({
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="rounded-xl rounded-r-2xl md:h-p[95%] md:top-[2.5%] md:right-[1%] w-full">
+      <SheetContent className="rounded-xl rounded-r-2xl md:h-[95%] md:top-[2.5%] md:right-[1%] w-full">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <span>Loading</span>
@@ -155,7 +157,7 @@ export const BookAppointment = ({
                       <FormLabel>Physician</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                         disabled={isSubmitting}
                       >
                         <FormControl>
@@ -199,6 +201,7 @@ export const BookAppointment = ({
                     placeholder=""
                     label="Date"
                     inputType="date"
+                    min={new Date().toISOString().split("T")[0]}
                   />
                   <CustomInput
                     type="select"

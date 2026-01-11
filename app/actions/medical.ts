@@ -4,6 +4,7 @@ import { DiagnosisFormData } from "@/components/dialogs/add-diagnosis";
 import db from "@/lib/db";
 import {
   DiagnosisSchema,
+  LabTestSchema,
   PatientBillSchema,
   PaymentSchema,
 } from "@/lib/schema";
@@ -23,16 +24,16 @@ export const addDiagnosis = async (
         data: {
           patient_id: validatedData.patient_id,
           doctor_id: validatedData.doctor_id,
-          appointment_id: Number(appointmentId),
+          appointment_id: appointmentId,
         },
       });
     }
 
-    const med_id = validatedData.medical_id || medicalRecord?.id;
+    const med_id = (validatedData.medical_id || medicalRecord?.id) as string;
     await db.diagnosis.create({
       data: {
         ...validatedData,
-        medical_id: Number(med_id),
+        medical_id: med_id,
       },
     });
 
@@ -63,18 +64,22 @@ export async function addNewBill(data: any) {
 
     const isValidData = PatientBillSchema.safeParse(data);
 
+    if (!isValidData.success) {
+      return { success: false, msg: "Invalid bill data" };
+    }
+
     const validatedData = isValidData.data;
     let bill_info = null;
 
     if (!data?.bill_id || data?.bill_id === "undefined") {
       const info = await db.appointment.findUnique({
-        where: { id: Number(data?.appointment_id)! },
+        where: { id: data?.appointment_id },
         select: {
           id: true,
           patient_id: true,
           bills: {
             where: {
-              appointment_id: Number(data?.appointment_id),
+              appointment_id: data?.appointment_id,
             },
           },
         },
@@ -83,7 +88,7 @@ export async function addNewBill(data: any) {
       if (!info?.bills?.length) {
         bill_info = await db.payment.create({
           data: {
-            appointment_id: Number(data?.appointment_id),
+            appointment_id: data?.appointment_id,
             patient_id: info?.patient_id!,
             bill_date: new Date(),
             payment_date: new Date(),
@@ -103,8 +108,8 @@ export async function addNewBill(data: any) {
 
     await db.patientBills.create({
       data: {
-        bill_id: Number(bill_info?.id),
-        service_id: Number(validatedData?.service_id),
+        bill_id: bill_info?.id as string,
+        service_id: validatedData?.service_id,
         service_date: new Date(validatedData?.service_date!),
         quantity: Number(validatedData?.quantity),
         unit_cost: Number(validatedData?.unit_cost),
@@ -127,6 +132,10 @@ export async function generateBill(data: any) {
   try {
     const isValidData = PaymentSchema.safeParse(data);
 
+    if (!isValidData.success) {
+      return { success: false, msg: "Invalid payment data" };
+    }
+
     const validatedData = isValidData.data;
 
     const discountAmount =
@@ -139,7 +148,7 @@ export async function generateBill(data: any) {
         discount: discountAmount,
         total_amount: Number(validatedData?.total_amount)!,
       },
-      where: { id: Number(validatedData?.id) },
+      where: { id: validatedData?.id },
     });
 
     await db.appointment.update({
@@ -156,5 +165,41 @@ export async function generateBill(data: any) {
   } catch (error) {
     console.log(error);
     return { success: false, msg: "Internal Server Error" };
+  }
+}
+
+export async function addLabTest(data: any) {
+  try {
+    const isAdmin = await checkRole("ADMIN");
+    const isDoctor = await checkRole("DOCTOR");
+
+    if (!isAdmin && !isDoctor) {
+      return {
+        success: false,
+        msg: "You are not authorized to add a lab test",
+      };
+    }
+
+    const validatedData = LabTestSchema.parse(data);
+
+    await (db.labTest.create as any)({
+      data: {
+        record_id: validatedData.record_id,
+        test_date: validatedData.test_date,
+        result: validatedData.result,
+        status: validatedData.status,
+        notes: validatedData.notes,
+        service_id: validatedData.service_id,
+        test_type: validatedData.test_type,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Lab test added successfully",
+    };
+  } catch (error: any) {
+    console.log(error);
+    return { success: false, message: error?.message || "Internal Server Error" };
   }
 }
