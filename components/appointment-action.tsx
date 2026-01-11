@@ -32,11 +32,11 @@ export const AppointmentAction = ({ id, status }: ActionProps) => {
       );
 
       if (resp.success) {
-        toast.success(resp.msg);
+        toast.success(resp.message);
 
         router.refresh();
       } else if (resp.error) {
-        toast.error(resp.msg);
+        toast.error(resp.message);
       }
     } catch (error) {
       console.log(error);
@@ -51,7 +51,12 @@ export const AppointmentAction = ({ id, status }: ActionProps) => {
       <div className="flex items-center space-x-3">
         <Button
           variant="outline"
-          disabled={status === "PENDING" || isLoading || status === "COMPLETED"}
+          disabled={
+            status === "PENDING" ||
+            isLoading ||
+            status === "COMPLETED" ||
+            status === "CANCELLED"
+          }
           className="bg-yellow-200 text-black"
           onClick={() => setSelected("PENDING")}
         >
@@ -60,7 +65,10 @@ export const AppointmentAction = ({ id, status }: ActionProps) => {
         <Button
           variant="outline"
           disabled={
-            status === "SCHEDULED" || isLoading || status === "COMPLETED"
+            status === "SCHEDULED" ||
+            isLoading ||
+            status === "COMPLETED" ||
+            status === "CANCELLED"
           }
           className="bg-blue-200 text-black"
           onClick={() => setSelected("SCHEDULED")}
@@ -70,7 +78,9 @@ export const AppointmentAction = ({ id, status }: ActionProps) => {
         <Button
           variant="outline"
           disabled={
-            status === "COMPLETED" || isLoading || status === "COMPLETED"
+            status === "COMPLETED" ||
+            isLoading ||
+            status === "CANCELLED"
           }
           className="bg-emerald-200 text-black"
           onClick={() => setSelected("COMPLETED")}

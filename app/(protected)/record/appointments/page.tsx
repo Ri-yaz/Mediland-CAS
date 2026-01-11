@@ -132,10 +132,10 @@ const Appointments = async (props: {
             <ViewAppointment id={item?.id} />
             <AppointmentActionOptions
               userId={userId!}
-              patientId={item?.patient_id}
-              doctorId={item?.doctor_id}
-              status={item?.status}
-              appointmentId={item.id}
+              patientId={item?.patient_id!}
+              doctorId={item?.doctor_id!}
+              status={item?.status!}
+              appointmentId={item.id!}
             />
           </div>
         </td>

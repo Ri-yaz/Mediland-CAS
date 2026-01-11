@@ -54,7 +54,7 @@ const PrescriptionPage = async () => {
                                 diag.prescribed_medications && (
                                     <div key={idx} className="space-y-2 pt-2 border-t border-gray-50 first:border-0 first:pt-0">
                                         <h3 className="font-semibold text-gray-700">
-                                            Medication from Dr. {diag.doctor.name}
+                                            Medication from Dr. {diag.doctor?.name || "Unknown"}
                                         </h3>
                                         <p className="text-gray-600 whitespace-pre-wrap">{diag.prescribed_medications}</p>
                                     </div>

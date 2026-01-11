@@ -32,7 +32,9 @@ export const PatientRatingContainer = async ({ id }: { id?: string }) => {
     distinct: ["doctor_id"],
   });
 
-  const doctors = appointmentDoctors.map((ad) => ad.doctor);
+  const doctors = appointmentDoctors
+    .map((ad) => ad.doctor)
+    .filter((doc): doc is { id: string; name: string } => doc !== null);
 
   if (!data) return null;
 

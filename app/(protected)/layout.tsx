@@ -1,13 +1,16 @@
 import { Navbar } from "@/components/navbar";
 import { Sidebar } from "@/components/sidebar";
 import { checkDoctorStatus } from "@/utils/check-doctor-status";
+import { getRole } from "@/utils/roles";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import React from "react";
+export const dynamic = "force-dynamic";
 
 const ProtectedLayout = async ({ children }: { children: React.ReactNode }) => {
   // Check if doctor is unauthorized and trying to access non-dashboard pages
   const { isDoctor, status } = await checkDoctorStatus();
+  const role = await getRole();
   const headerList = await headers();
   const currentPath = headerList.get("x-url") || "";
 
@@ -26,7 +29,7 @@ const ProtectedLayout = async ({ children }: { children: React.ReactNode }) => {
       </div>
 
       <div className="w-[86%] md:w-[92%] lg:w-[84%] xl:w-[86%] bg-[#F7F8FA] flex flex-col">
-        <Navbar />
+        <Navbar role={role} />
 
         <div className="h-full w-full p-2 overflow-y-scroll">{children}</div>
       </div>

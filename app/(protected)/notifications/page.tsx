@@ -1,7 +1,16 @@
 import { Bell } from "lucide-react";
 import React from "react";
 
-const NotificationsPage = () => {
+import { getRole } from "@/utils/roles";
+import { redirect } from "next/navigation";
+
+const NotificationsPage = async () => {
+    const role = await getRole();
+
+    if (role === "admin") {
+        redirect("/");
+    }
+
     return (
         <div className="h-[calc(100vh-100px)] flex flex-col items-center justify-center p-6 text-center">
             <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6">

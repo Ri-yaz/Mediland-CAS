@@ -43,8 +43,7 @@ export const AppointmentActionDialog = ({
       setIsLoading(true);
       const newReason =
         reason ||
-        `Appointment has ben ${
-          type === "approve" ? "scheduled" : "cancelled"
+        `Appointment has ben ${type === "approve" ? "scheduled" : "cancelled"
         } on ${new Date()}`;
 
       const resp = await appointmentAction(
@@ -54,11 +53,11 @@ export const AppointmentActionDialog = ({
       );
 
       if (resp.success) {
-        toast.success(resp.msg);
+        toast.success(resp.message);
         setReason("");
         router.refresh();
       } else if (resp.error) {
-        toast.error(resp.msg);
+        toast.error(resp.message);
       }
     } catch (error) {
       console.log(error);

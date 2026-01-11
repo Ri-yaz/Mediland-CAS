@@ -70,12 +70,12 @@ export const Sidebar = async () => {
           access: ["admin"],
           icon: User,
         },
-        {
-          name: "Staffs",
-          href: "/record/staffs",
-          access: ["admin", "doctor"],
-          icon: UserRound,
-        },
+        // {
+        //   name: "Staffs",
+        //   href: "/record/staffs",
+        //   access: ["admin", "doctor"],
+        //   icon: UserRound,
+        // },
         {
           name: "Patients",
           href: "/record/patients",
@@ -132,7 +132,9 @@ export const Sidebar = async () => {
         {
           name: "Notifications",
           href: "/notifications",
-          access: ACCESS_LEVELS_ALL.filter((role) => role !== "doctor"),
+          access: ACCESS_LEVELS_ALL.filter(
+            (role) => role !== "doctor" && role !== "admin"
+          ),
           icon: Bell,
         },
         {
@@ -170,36 +172,47 @@ export const Sidebar = async () => {
         </div>
 
         <div className="mt-4 text-sm">
-          {SIDEBAR_LINKS.map((el) => (
-            <div key={el.label} className="flex flex-col gap-2">
-              <span className="hidden uppercase lg:block text-gray-400 font-bold my-4">
-                {el.label}
-              </span>
+          {SIDEBAR_LINKS.map((el) => {
+            // Hide "System" section for doctors and patients
+            if (
+              (role.toLowerCase() === "doctor" ||
+                role.toLowerCase() === "patient") &&
+              el.label === "System"
+            ) {
+              return null;
+            }
 
-              {el.links.map((link) => {
-                // Check if user has access to this link based on role
-                if (!link.access.includes(role.toLowerCase())) {
-                  return null;
-                }
+            return (
+              <div key={el.label} className="flex flex-col gap-2">
+                <span className="hidden uppercase lg:block text-gray-400 font-bold my-4">
+                  {el.label}
+                </span>
 
-                // For unauthorized doctors (PENDING status), only show Dashboard
-                if (isDoctor && doctorStatus === "PENDING" && link.href !== "/") {
-                  return null;
-                }
+                {el.links.map((link) => {
+                  // Check if user has access to this link based on role
+                  if (!link.access.includes(role.toLowerCase())) {
+                    return null;
+                  }
 
-                return (
-                  <Link
-                    href={link.href}
-                    className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-blue-600/10"
-                    key={link.name}
-                  >
-                    <SidebarIcon icon={link.icon} />
-                    <span className="hidden lg:block">{link.name}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
+                  // For unauthorized doctors (PENDING status), only show Dashboard
+                  if (isDoctor && doctorStatus === "PENDING" && link.href !== "/") {
+                    return null;
+                  }
+
+                  return (
+                    <Link
+                      href={link.href}
+                      className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-blue-600/10"
+                      key={link.name}
+                    >
+                      <SidebarIcon icon={link.icon} />
+                      <span className="hidden lg:block">{link.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
       </div>
 

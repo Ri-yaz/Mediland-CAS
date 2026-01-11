@@ -12,10 +12,12 @@ export const DiagnosisContainer = async ({
   patientId,
   doctorId,
   id,
+  status,
 }: {
   patientId: string;
   doctorId: string;
   id: string;
+  status?: string;
 }) => {
   const { userId } = await auth();
 
@@ -40,13 +42,15 @@ export const DiagnosisContainer = async ({
       {diagnosis?.length === 0 || !diagnosis ? (
         <div className="flex flex-col items-center justify-center mt-20">
           <NoDataFound note="No diagnosis found" />
-          <AddDiagnosis
-            key={new Date().getTime()}
-            patientId={patientId}
-            doctorId={doctorId}
-            appointmentId={id}
-            medicalId={data?.id.toString() || ""}
-          />
+          {status !== "CANCELLED" && status !== "COMPLETED" && (
+            <AddDiagnosis
+              key={new Date().getTime()}
+              patientId={patientId}
+              doctorId={doctorId}
+              appointmentId={id}
+              medicalId={data?.id.toString() || ""}
+            />
+          )}
         </div>
       ) : (
         <section className="space-y-6">
@@ -54,7 +58,7 @@ export const DiagnosisContainer = async ({
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Medical Records</CardTitle>
 
-              {!isPatient && (
+              {!isPatient && status !== "CANCELLED" && status !== "COMPLETED" && (
                 <AddDiagnosis
                   key={new Date().getTime()}
                   patientId={patientId}

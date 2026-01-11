@@ -3,7 +3,7 @@ import { Card } from "../ui/card";
 import { Separator } from "../ui/separator";
 
 interface ExtendedMedicalRecord extends Diagnosis {
-  doctor: Doctor;
+  doctor: Doctor | null;
 }
 export const MedicalHistoryCard = ({
   record,
@@ -60,9 +60,9 @@ export const MedicalHistoryCard = ({
           <span className="text-sm text-gray-500">Doctor</span>
           <div>
             <p className="text-lg text-muted-foreground">
-              {record.doctor.name}
+              {record.doctor?.name || "Unknown"}
             </p>
-            <span>{record.doctor.specialization}</span>
+            <span>{record.doctor?.specialization || "General"}</span>
           </div>
         </div>
       </div>

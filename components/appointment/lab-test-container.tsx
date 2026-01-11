@@ -9,8 +9,10 @@ import { LabTestCard } from "./lab-test-card";
 
 export const LabTestContainer = async ({
     id,
+    status,
 }: {
     id: string;
+    status?: string;
 }) => {
     const { userId } = await auth();
 
@@ -38,7 +40,7 @@ export const LabTestContainer = async ({
             {labTests.length === 0 ? (
                 <div className="flex flex-col items-center justify-center mt-20">
                     <NoDataFound note="No lab tests found" />
-                    {!isPatient && (
+                    {!isPatient && status !== "CANCELLED" && status !== "COMPLETED" && (
                         <AddLabTest
                             medicalId={data?.id || ""}
                             servicesData={services}
@@ -51,7 +53,7 @@ export const LabTestContainer = async ({
                         <CardHeader className="flex flex-row items-center justify-between px-0">
                             <CardTitle>Lab Test Results</CardTitle>
 
-                            {!isPatient && (
+                            {!isPatient && status !== "CANCELLED" && status !== "COMPLETED" && (
                                 <AddLabTest
                                     medicalId={data?.id || ""}
                                     servicesData={services}

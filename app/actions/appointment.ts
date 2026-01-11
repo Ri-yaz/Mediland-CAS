@@ -43,9 +43,9 @@ export async function createNewAppointment(data: any) {
     });
 
     // Send Booking Confirmation Email
-    const patientName = `${appointment.patient.first_name} ${appointment.patient.last_name}`;
-    const doctorName = appointment.doctor.name;
-    const patientEmail = appointment.patient.email;
+    const patientName = `${appointment.patient!.first_name} ${appointment.patient!.last_name}`;
+    const doctorName = appointment.doctor!.name;
+    const patientEmail = appointment.patient!.email;
 
     const emailHtml = generateBookingConfirmationEmail(
       patientName,
@@ -64,7 +64,7 @@ export async function createNewAppointment(data: any) {
     await db.notification.create({
       data: {
         userId: validated.doctor_id,
-        message: `New appointment booking from ${appointment.patient.first_name} ${appointment.patient.last_name}`,
+        message: `New appointment booking from ${appointment.patient!.first_name} ${appointment.patient!.last_name}`,
       },
     });
 
@@ -109,9 +109,9 @@ export async function appointmentAction(
 
     // Send Email Notification
     if (status === "SCHEDULED" || status === "CANCELLED") {
-      const patientName = `${updatedAppointment.patient.first_name} ${updatedAppointment.patient.last_name}`;
-      const doctorName = updatedAppointment.doctor.name;
-      const patientEmail = updatedAppointment.patient.email;
+      const patientName = `${updatedAppointment.patient!.first_name} ${updatedAppointment.patient!.last_name}`;
+      const doctorName = updatedAppointment.doctor!.name;
+      const patientEmail = updatedAppointment.patient!.email;
 
       const emailHtml = generateAppointmentEmail(
         patientName,
@@ -127,6 +127,24 @@ export async function appointmentAction(
         subject: `Appointment ${status === "SCHEDULED" ? "Approved" : "Declined"}`,
         html: emailHtml,
       });
+
+      if (status === "SCHEDULED" && updatedAppointment.doctor_id) {
+        await db.notification.create({
+          data: {
+            userId: updatedAppointment.doctor_id,
+            message: `you have been appointed ${patientName} patient`,
+          },
+        });
+      }
+
+      if (status === "CANCELLED" && updatedAppointment.doctor_id) {
+        await db.notification.create({
+          data: {
+            userId: updatedAppointment.doctor_id,
+            message: `the appointment for ${patientName} has been cancelled`,
+          },
+        });
+      }
     }
 
     return {

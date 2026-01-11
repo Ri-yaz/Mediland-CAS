@@ -13,6 +13,7 @@ interface VitalSignsProps {
   doctorId: string;
   medicalId?: string;
   appointmentId?: string;
+  status?: string;
 }
 
 const ItemCard = ({ label, value }: { label: string; value: string }) => {
@@ -27,6 +28,7 @@ export const VitalSigns = async ({
   id,
   patientId,
   doctorId,
+  status,
 }: VitalSignsProps) => {
   const data = await db.medicalRecords.findFirst({
     where: { appointment_id: id as string },
@@ -48,7 +50,7 @@ export const VitalSigns = async ({
         <CardHeader className="flex flex-row justify-between items-center">
           <CardTitle>Vital Signs</CardTitle>
 
-          {!isPatient && (
+          {!isPatient && status !== "CANCELLED" && status !== "COMPLETED" && (
             <AddVitalSigns
               key={new Date().getTime()}
               patientId={patientId}

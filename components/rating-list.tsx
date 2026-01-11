@@ -3,12 +3,12 @@ import React from "react";
 
 interface DataProps {
   id: string;
-  doctor_id: string;
+  doctor_id: string | null;
   rating: number;
   comment?: string | null;
   created_at: Date | string;
-  patient: { last_name: string; first_name: string };
-  doctor?: { name: string };
+  patient: { last_name: string; first_name: string } | null;
+  doctor?: { name: string } | null;
 }
 
 export const RatingList = ({
@@ -36,7 +36,7 @@ export const RatingList = ({
                   <div className="flex items-center gap-3">
                     <p className="text-base font-semibold text-gray-900">
                       {showPatientName
-                        ? `${rate.patient.first_name} ${rate.patient.last_name}`
+                        ? `${rate.patient?.first_name || "Unknown"} ${rate.patient?.last_name || "Patient"}`
                         : `Review for Dr. ${rate.doctor?.name || "Unknown"}`}
                     </p>
                     <span className="text-sm text-gray-500">

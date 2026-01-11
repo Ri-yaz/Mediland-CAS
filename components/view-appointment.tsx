@@ -67,7 +67,7 @@ export const ViewAppointment = async ({ id }: { id: string | undefined }) => {
                 <ProfileImage
                   url={data?.patient?.img!}
                   name={
-                    data?.patient?.first_name + " " + data?.patient?.last_name
+                    (data?.patient?.first_name || "") + " " + (data?.patient?.last_name || "")
                   }
                   className="size-20 bg-blue-500"
                   textClassName="text-2xl"
@@ -78,10 +78,12 @@ export const ViewAppointment = async ({ id }: { id: string | undefined }) => {
                     {data?.patient?.first_name + " " + data?.patient?.last_name}
                   </h2>
 
-                  <p className="flex items-center gap-2 text-gray-600">
-                    <Calendar size={20} className="text-gray-500" />
-                    {calculateAge(data?.patient?.date_of_birth)}
-                  </p>
+                  {data?.patient?.date_of_birth && (
+                    <p className="flex items-center gap-2 text-gray-600">
+                      <Calendar size={20} className="text-gray-500" />
+                      {calculateAge(data.patient.date_of_birth)}
+                    </p>
+                  )}
 
                   <span className="flex items-center text-sm gap-2">
                     <Phone size={16} className="text-gray-500" />
@@ -106,7 +108,7 @@ export const ViewAppointment = async ({ id }: { id: string | undefined }) => {
               <div>
                 <span className="text-sm text-gray-500">Date</span>
                 <p className="text-sm text-gray-600">
-                  {format(data?.appointment_date, "MMM dd, yyyy")}
+                  {data?.appointment_date && format(data.appointment_date, "MMM dd, yyyy")}
                 </p>
               </div>
               <div>
@@ -133,13 +135,13 @@ export const ViewAppointment = async ({ id }: { id: string | undefined }) => {
               <div className="flex gap-3">
                 <ProfileImage
                   url={data?.doctor?.img!}
-                  name={data?.doctor?.name}
+                  name={data?.doctor?.name || "Doctor"}
                   className="xl:size-20 bg-emerald-600"
                   textClassName="xl:text-2xl"
                 />
                 <div className="">
                   <h2 className="text-lg uppercase font-medium">
-                    {data?.doctor?.name}
+                    {data?.doctor?.name || "Unknown Doctor"}
                   </h2>
                   <p className="flex items-center gap-2 text-gray-600 capitalize">
                     {data?.doctor?.specialization}

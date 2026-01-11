@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import React from "react";
 import { NotificationBell } from "./notification-bell";
 
-export const Navbar = () => {
+export const Navbar = ({ role }: { role?: string }) => {
   function formatPathName(): string {
     const pathname = usePathname();
 
@@ -30,7 +30,7 @@ export const Navbar = () => {
       </h1>
 
       <div className="flex items-center gap-4">
-        <NotificationBell />
+        {role !== "admin" && <NotificationBell />}
 
         <SignedIn>
           <UserButton />

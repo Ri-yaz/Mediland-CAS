@@ -13,12 +13,6 @@ const AppointmentQuickLinks = async ({ doctorId }: { doctorId: string }) => {
       </CardHeader>
       <CardContent className="flex flex-wrap gap-2">
         <Link
-          href="?cat=charts"
-          className="px-4 py-2 rounded-lg bg-gray-100 text-gray-600"
-        >
-          Charts
-        </Link>
-        <Link
           href="?cat=appointments"
           className="px-4 py-2 rounded-lg bg-violet-100 text-violet-600"
         >

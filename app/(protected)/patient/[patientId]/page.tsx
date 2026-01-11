@@ -1,5 +1,4 @@
 import { MedicalHistoryContainer } from "@/components/medical-history-container";
-import { PaymentsContainer } from "@/components/appointment/payment-container";
 import { PatientRatingContainer } from "@/components/patient-rating-container";
 import { PatientLabTestContainer } from "@/components/patient-lab-test-container";
 import { ProfileImage } from "@/components/profile-image";

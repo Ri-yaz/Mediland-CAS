@@ -182,3 +182,5 @@ export function calculateDiscount({
     );
   }
 }
+
+export { cn } from "@/lib/utils";

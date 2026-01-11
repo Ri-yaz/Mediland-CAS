@@ -3,8 +3,7 @@ import { Card } from "../ui/card";
 import { Separator } from "../ui/separator";
 
 interface ExtendedLabTest extends LabTest {
-    services?: Services | null;
-    test_type?: string | null;
+    services: Services | null;
 }
 
 export const LabTestCard = ({

@@ -49,21 +49,27 @@ export const AppointmentActionOptions = async ({
             </Link>
           </Button>
 
-          {status !== "SCHEDULED" && (
+          {status !== "SCHEDULED" &&
+            status !== "CANCELLED" &&
+            status !== "COMPLETED" && (
+              <AppointmentActionDialog
+                type="approve"
+                id={appointmentId}
+                disabled={isAdmin || user.userId === doctorId}
+              />
+            )}
+          {status !== "CANCELLED" && status !== "COMPLETED" && (
             <AppointmentActionDialog
-              type="approve"
+              type="cancel"
               id={appointmentId}
-              disabled={isAdmin || user.userId === doctorId}
+              disabled={
+                status === "PENDING" &&
+                (isAdmin ||
+                  user.userId === doctorId ||
+                  user.userId === patientId)
+              }
             />
           )}
-          <AppointmentActionDialog
-            type="cancel"
-            id={appointmentId}
-            disabled={
-              status === "PENDING" &&
-              (isAdmin || user.userId === doctorId || user.userId === patientId)
-            }
-          />
         </div>
       </PopoverContent>
     </Popover>

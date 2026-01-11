@@ -15,7 +15,6 @@ const columns = [
     { header: "Doctor", key: "doctor", className: "hidden md:table-cell" },
     { header: "Date", key: "date", className: "hidden md:table-cell" },
     { header: "Medications", key: "medications" },
-    { header: "Status", key: "status", className: "hidden xl:table-cell" },
 ];
 
 const AdministerMedicationsPage = async (props: { searchParams?: Promise<{ [key: string]: string | undefined }> }) => {
@@ -59,9 +58,6 @@ const AdministerMedicationsPage = async (props: { searchParams?: Promise<{ [key:
                 <td className="hidden md:table-cell">{item?.doctor_id}</td>
                 <td className="hidden md:table-cell">{format(item?.created_at, "yyyy-MM-dd")}</td>
                 <td className="max-w-xs truncate" title={medications}>{medications}</td>
-                <td className="hidden xl:table-cell">
-                    <span className="px-2 py-1 rounded bg-blue-100 text-blue-600 text-xs">Pending</span>
-                </td>
             </tr>
         );
     };

@@ -63,10 +63,10 @@ export const AddVitalSigns = ({
 
       if (res.success) {
         router.refresh();
-        toast.success(res.msg);
+        toast.success(res.message);
         form.reset();
       } else {
-        toast.error(res.msg);
+        toast.error(res.message);
       }
     } catch (error) {
       console.log(error);
